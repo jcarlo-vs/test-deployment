@@ -4,9 +4,11 @@ on:
   pull_request:
     branches:
       - main
+    # CI will run here
   push:
     branches:
       - main
+    # CI + CD will run here
 
 env:
   AWS_REGION: 'ap-southeast-1'
@@ -47,6 +49,7 @@ jobs:
     name: Continuous Deployment
     runs-on: ubuntu-latest
     needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
