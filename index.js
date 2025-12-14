@@ -4,7 +4,7 @@ const port = 3000;
 const winston = require('winston');
 const axios = require('axios');
 
-const { ordersRoute } = require('./routes');
+const routes = require('./routes');
 
 // Configure Winston logger with better formatting
 const logger = winston.createLogger({
@@ -93,7 +93,7 @@ app.get('/api/v1/users', async (req, res) => {
   }
 });
 
-app.use('/', ordersRoute);
+app.use('/', routes);
 
 app.use((req, res) => {
   logger.error('Route not found', { url: req.url });
