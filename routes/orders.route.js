@@ -9,21 +9,17 @@ const orders = [
 
 router.get('/orders', async (req, res) => {
   try {
-    logger.info('Fetching orders');
     res.status(200).json({ data: orders });
   } catch (error) {
-    logger.error('Error fetching orders', { error: error.message });
     res.status(500).json({ message: 'Error fetching orders' });
   }
 });
 
 router.get('/orders/:id', async (req, res) => {
   try {
-    logger.info(`Fetching order ${req.params.id}`);
     const order = orders.find((order) => order.id === parseInt(req.params.id));
     res.status(200).json({ data: order });
   } catch (error) {
-    logger.error('Error fetching order', { error: error.message });
     res.status(500).json({ message: 'Error fetching order' });
   }
 });
