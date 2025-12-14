@@ -18,7 +18,9 @@ router.get('/orders', async (req, res) => {
 router.get('/orders/:id', async (req, res) => {
   try {
     const order = orders.find((order) => order.id === parseInt(req.params.id));
-    res.status(200).json({ data: order });
+    res
+      .status(200)
+      .json({ data: order, message: 'Order fetched successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching order' });
   }
