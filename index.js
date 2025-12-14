@@ -3,6 +3,9 @@ const app = express();
 const port = 3000;
 const winston = require('winston');
 const axios = require('axios');
+
+const { ordersRoute } = require('./routes');
+
 // Configure Winston logger with better formatting
 const logger = winston.createLogger({
   level: 'info',
@@ -89,6 +92,8 @@ app.get('/api/v1/users', async (req, res) => {
     res.status(500).json({ message: 'Error fetching users' });
   }
 });
+
+app.use('/', ordersRoute);
 
 app.use((req, res, next) => {
   logger.error('Route not found', { url: req.url });
