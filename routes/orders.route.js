@@ -9,9 +9,12 @@ const orders = [
 
 router.get('/orders', async (req, res) => {
   try {
+    console.log('orders', orders);
     res.status(200).json({ data: orders });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching orders' });
+    res
+      .status(500)
+      .json({ message: 'error fetching orders', error: error?.message });
   }
 });
 
@@ -22,7 +25,9 @@ router.get('/orders/:id', async (req, res) => {
       .status(200)
       .json({ data: order, message: 'Order fetched successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching order' });
+    res
+      .status(500)
+      .json({ message: 'Error fetching order', error: error?.message });
   }
 });
 

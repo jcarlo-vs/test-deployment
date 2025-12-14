@@ -95,7 +95,7 @@ app.get('/api/v1/users', async (req, res) => {
 
 app.use('/', ordersRoute);
 
-app.use((req, res, next) => {
+app.use((req, res) => {
   logger.error('Route not found', { url: req.url });
   res.status(404).json({ message: 'Route not found' });
 });

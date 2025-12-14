@@ -40,9 +40,8 @@ jobs:
         run: npm test
         continue-on-error: true
 
-      - name: Lint code (optional)
-        run: echo "Add linting step if needed"
-        continue-on-error: true
+      - name: Lint code
+        run: npm run lint
 
   # CD Job - Build Docker Image and Deploy to ECS
   cd:
