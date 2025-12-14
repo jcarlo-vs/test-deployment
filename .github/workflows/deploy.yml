@@ -7,11 +7,10 @@ on:
 
 env:
   AWS_REGION: 'ap-southeast-1'
+  ECR_REGISTRY: 381492190046.dkr.ecr.ap-southeast-1.amazonaws.com
   ECR_REPOSITORY: my-nodejs-app
   ECS_SERVICE: my-nodejs-app-task-service
   ECS_CLUSTER: my-nodejs-app-cluster
-  ECS_TASK_DEFINITION: my-nodejs-app-task
-  CONTAINER_NAME: my-nodejs-app
 
 jobs:
   # CI Job - Build and Test
@@ -58,51 +57,31 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      - name: Build and push Docker image to ECR
         run: |
-          echo "Building Docker image for linux/arm64..."
+          echo "Building and pushing Docker image for linux/arm64..."
           docker buildx build \
             --platform linux/arm64 \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest \
             --push \
             .
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+          echo "✅ Image pushed: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest"
 
-      - name: Download current task definition
+      - name: Force new ECS deployment
         run: |
-          aws ecs describe-task-definition \
-            --task-definition ${{ env.ECS_TASK_DEFINITION }} \
-            --query taskDefinition > task-definition.json
+          echo "Forcing new deployment on ECS..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
 
-      - name: Update task definition with new image
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
-
-      - name: Deploy to Amazon ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
-          force-new-deployment: true
-
-      - name: Deployment successful
-        run: |
-          echo "✅ Deployment completed successfully!"
-          echo "Image: ${{ steps.build-image.outputs.image }}"
+          echo "✅ Deployment triggered successfully!"
           echo "Service: ${{ env.ECS_SERVICE }}"
           echo "Cluster: ${{ env.ECS_CLUSTER }}"
+          echo "ECS will now pull the new :latest image and update your service."
